@@ -1,0 +1,72 @@
+﻿<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>128c8102-caf5-4c03-b082-ec27cb8ed74a</ProjectGuid>
+    <ProjectTypeGuids>{a41c8ea1-112a-4a2d-9f91-29557995525f};{888888a0-9f3d-457c-b088-3a5042f75d52}</ProjectTypeGuids>
+    <ProjectHome>.</ProjectHome>
+    <StartupFile>..\..\tournament.py</StartupFile>
+    <SearchPath>..\..\..\AIND-Isolation;..\..\..\AIND-Isolation;..\..\..\AIND-Isolation;..\..\..\AIND-Isolation;..\..\..\AIND-Isolation</SearchPath>
+    <WorkingDirectory>.</WorkingDirectory>
+    <OutputPath>.</OutputPath>
+    <Name>AIND-Isolation_Proj</Name>
+    <RootNamespace>AIND-Isolation_Proj</RootNamespace>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+    <DebugSymbols>true</DebugSymbols>
+    <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <DebugSymbols>true</DebugSymbols>
+    <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
+  </PropertyGroup>
+  <ItemGroup>
+    <Folder Include="isolation\" />
+    <Folder Include="isoviz\" />
+    <Folder Include="isoviz\css\" />
+    <Folder Include="isoviz\img\" />
+    <Folder Include="isoviz\img\chesspieces\" />
+    <Folder Include="isoviz\img\chesspieces\wikipedia\" />
+    <Folder Include="isoviz\js\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Comments.txt" />
+    <Content Include="isolation\README.md" />
+    <Content Include="isoviz\css\chessboard.css" />
+    <Content Include="isoviz\display.html" />
+    <Content Include="isoviz\img\chesspieces\wikipedia\bN.png" />
+    <Content Include="isoviz\img\chesspieces\wikipedia\wN.png" />
+    <Content Include="isoviz\js\chessboard.js" />
+    <Content Include="isoviz\js\jquery-1.10.1.min.js" />
+    <Content Include="isoviz\js\json3.min.js" />
+    <Content Include="isoviz\LICENSE.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\..\agent_test.py">
+      <Link>agent_test.py</Link>
+    </Compile>
+    <Compile Include="..\..\competition_agent.py">
+      <Link>competition_agent.py</Link>
+    </Compile>
+    <Compile Include="..\..\game_agent.py">
+      <Link>game_agent.py</Link>
+    </Compile>
+    <Compile Include="..\..\sample_players.py">
+      <Link>sample_players.py</Link>
+    </Compile>
+    <Compile Include="..\..\tournament.py">
+      <Link>tournament.py</Link>
+    </Compile>
+    <Compile Include="isolation\isolation.py" />
+    <Compile Include="isolation\__init__.py" />
+  </ItemGroup>
+  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
+  <!-- Uncomment the CoreCompile target to enable the Build command in
+       Visual Studio and specify your pre- and post-build commands in
+       the BeforeBuild and AfterBuild targets below. -->
+  <!--<Target Name="CoreCompile" />-->
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+</Project>

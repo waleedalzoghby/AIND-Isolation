@@ -4,11 +4,81 @@ and include the results in your report.
 """
 import random
 
-
 class SearchTimeout(Exception):
     """Subclass base exception for code clarity. """
     pass
 
+def minimizing_opponent_moves(game, player):
+    if game.is_loser(player):
+        return float("-inf")
+
+    if game.is_winner(player):
+        return float("inf")
+
+    #my_moves = len(game.get_legal_moves(player))
+    #opponent_moves = len(game.get_legal_moves(game.get_opponent(player)))
+    #return float(my_moves - 5 * opponent_moves)
+
+    # get current move count
+    move_count = game.move_count
+
+    # count number of moves available
+    own_moves = len(game.get_legal_moves(player))
+    opp_moves = len(game.get_legal_moves(game.get_opponent(player)))
+
+    # calculate weight
+    w = 10 / (move_count + 1)
+
+    # return weighted delta of available moves
+    return float(own_moves - (w * opp_moves))
+
+def maximizing_player_moves(game, player):
+    if game.is_loser(player):
+        return float("-inf")
+
+    if game.is_winner(player):
+        return float("inf")
+
+    my_moves = len(game.get_legal_moves(player))
+    opponent_moves = len(game.get_legal_moves(game.get_opponent(player)))
+
+    return float(5 * my_moves - opponent_moves)
+
+def maximizing_ratio_of_player_to_opponent_move(game, player):
+    if game.is_loser(player):
+        return float("-inf")
+
+    if game.is_winner(player):
+        return float("inf")
+
+    #my_moves = len(game.get_legal_moves(player))
+    #opponent_moves = len(game.get_legal_moves(game.get_opponent(player)))
+
+    #if(my_moves == 0):
+    #    return float("-inf")
+
+    #if(opponent_moves == 0):
+    #    return float("inf")
+
+    #return float(my_moves / opponent_moves)
+
+    score = .0
+    total_spaces = game.width * game.height
+    remaining_spaces = len(game.get_blank_spaces())
+    coefficient = float(total_spaces - remaining_spaces) / float(total_spaces)
+
+    my_moves = game.get_legal_moves(player)
+    opponent_moves = game.get_legal_moves(game.get_opponent(player))
+
+    for move in my_moves:
+        isNearWall = 1 if (move[0] == 0 or move[0] == game.width - 1 or move[1] == 0 or move[1] == game.height - 1) else 0
+        score += 1 - coefficient * isNearWall
+
+    for move in opponent_moves:
+        isNearWall = 1 if (move[0] == 0 or move[0] == game.width - 1 or move[1] == 0 or move[1] == game.height - 1) else 0
+        score -= 1 - coefficient * isNearWall
+
+    return score
 
 def custom_score(game, player):
     """Calculate the heuristic value of a game state from the point of view
@@ -35,9 +105,8 @@ def custom_score(game, player):
         The heuristic value of the current game state to the specified player.
     """
     # TODO: finish this function!
-    raise NotImplementedError
-
-
+    return minimizing_opponent_moves(game,player)
+    
 def custom_score_2(game, player):
     """Calculate the heuristic value of a game state from the point of view
     of the given player.
@@ -61,8 +130,7 @@ def custom_score_2(game, player):
         The heuristic value of the current game state to the specified player.
     """
     # TODO: finish this function!
-    raise NotImplementedError
-
+    return maximizing_player_moves(game,player)
 
 def custom_score_3(game, player):
     """Calculate the heuristic value of a game state from the point of view
@@ -87,7 +155,7 @@ def custom_score_3(game, player):
         The heuristic value of the current game state to the specified player.
     """
     # TODO: finish this function!
-    raise NotImplementedError
+    return maximizing_ratio_of_player_to_opponent_move(game,player)
 
 
 class IsolationPlayer:
@@ -117,7 +185,6 @@ class IsolationPlayer:
         self.score = score_fn
         self.time_left = None
         self.TIMER_THRESHOLD = timeout
-
 
 class MinimaxPlayer(IsolationPlayer):
     """Game-playing agent that chooses a move using depth-limited minimax
@@ -213,8 +280,56 @@ class MinimaxPlayer(IsolationPlayer):
             raise SearchTimeout()
 
         # TODO: finish this function!
-        raise NotImplementedError
+        
+        moves = game.get_legal_moves(self)
+        bestmove = (-1, -1)
 
+        xlist = []
+        for move in moves:
+            xgame = game.forecast_move(move)
+            tmpvalue = self.Min_Value(xgame, depth - 1)
+            
+            xlist.append((tmpvalue,xgame.is_winner(self),move))
+
+            if(xgame.is_winner(self)):
+                bestmove = xgame.get_player_location(self)
+
+        xxlist = sorted(xlist, key=lambda tup: tup[0],reverse=True)
+        if(bestmove == (-1,-1) and len(xxlist) != 0): _,_,bestmove = xxlist[:1][0]
+
+        return bestmove
+
+    def Max_Value(self, game, depth):
+        """Max Value
+        """
+        if self.time_left() < self.TIMER_THRESHOLD:
+            raise SearchTimeout()
+
+        alpha = float("-inf")
+        moves = game.get_legal_moves(self)
+        if(depth == 0 or len(moves) == 0):
+           return self.score(game,self)
+
+        for move in moves:
+            alpha = max(alpha, self.Min_Value(game.forecast_move(move), depth - 1))
+            
+        return alpha
+
+    def Min_Value(self, game, depth):
+        """Min Value
+        """
+        if self.time_left() < self.TIMER_THRESHOLD:
+            raise SearchTimeout()
+        
+        alpha = float("inf")
+        moves = game.get_legal_moves(game.get_opponent(self)) 
+        if(depth == 0 or len(moves) == 0):
+           return self.score(game,self)
+
+        for move in moves:
+            alpha = min(alpha, self.Max_Value(game.forecast_move(move), depth - 1))
+
+        return alpha
 
 class AlphaBetaPlayer(IsolationPlayer):
     """Game-playing agent that chooses a move using iterative deepening minimax
@@ -253,9 +368,30 @@ class AlphaBetaPlayer(IsolationPlayer):
             (-1, -1) if there are no available legal moves.
         """
         self.time_left = time_left
-
         # TODO: finish this function!
-        raise NotImplementedError
+        
+        # Initialize the best move so that this function returns something
+        # in case the search fails due to timeout
+        best_move = (-1, -1)
+
+
+        try:
+            # The try/except block will automatically catch the exception
+            # raised when the timer is about to expire.
+            
+            for depth in range(1, game.width * game.height):
+                moves = game.get_legal_moves(self)
+                if not moves:
+                    return best_move
+
+                best_move = self.alphabeta(game, depth)
+
+
+        except SearchTimeout:
+            pass  # Handle any actions required after timeout as needed
+
+        # Return the best move from the last completed search iteration
+        return best_move
 
     def alphabeta(self, game, depth, alpha=float("-inf"), beta=float("inf")):
         """Implement depth-limited minimax search with alpha-beta pruning as
@@ -302,8 +438,67 @@ class AlphaBetaPlayer(IsolationPlayer):
                 each helper function or else your agent will timeout during
                 testing.
         """
+        #self.TIMER_THRESHOLD = float("-inf")
         if self.time_left() < self.TIMER_THRESHOLD:
             raise SearchTimeout()
 
         # TODO: finish this function!
-        raise NotImplementedError
+
+        moves = game.get_legal_moves(self)
+        bestmove = (-1, -1)
+        bestscore = float("-inf")
+
+        for move in moves:
+            xgame = game.forecast_move(move)
+            tmpvalue = self.Min_Value(xgame, depth - 1, bestscore, beta)
+            if(tmpvalue > bestscore):
+                bestscore = tmpvalue
+                bestmove = move
+
+        return bestmove
+
+    def Max_Value(self, game, depth, alpha, beta):
+        """Max Value
+        """
+        if self.time_left() < self.TIMER_THRESHOLD:
+            raise SearchTimeout()
+
+        moves = game.get_legal_moves(self)
+
+        if(depth == 0 or not moves):
+            xscore = self.score(game,self)
+            return xscore
+
+        val = float("-inf")
+
+        for move in moves:
+            xgame = game.forecast_move(move)
+            val = max(val, self.Min_Value(xgame, depth - 1, alpha, beta))
+            if(val >= beta):
+                return val
+            alpha = max(alpha,val)
+            
+        return val
+
+    def Min_Value(self, game, depth, alpha, beta):
+        """Min Value
+        """
+        if self.time_left() < self.TIMER_THRESHOLD:
+            raise SearchTimeout()
+        
+        moves = game.get_legal_moves(game.get_opponent(self))
+
+        if(depth == 0 or not moves):
+            xscore = self.score(game,self)
+            return xscore
+
+        val = float("inf")
+
+        for move in moves:
+            xgame = game.forecast_move(move)
+            val = min(val, self.Max_Value(xgame, depth - 1, alpha, beta))
+            if(val <= alpha):
+                return val
+            beta = min(beta,val)
+
+        return val
